@@ -1,0 +1,371 @@
+/* make sizing predictable to avoid overflow */
+*, *::before, *::after{ box-sizing: border-box }
+
+html { height: 100%; background: linear-gradient(180deg, var(--bg) 0%, #0f1214 100%); }
+body { min-height: 100vh; background: linear-gradient(180deg, var(--bg) 0%, #0f1214 100%); background-attachment: fixed; background-repeat: no-repeat }
+
+/* When a modal is open, prevent background page scrolling */
+body.modal-open{ overflow: hidden; }
+:root{
+	--bg:#0b0f12;
+	--panel:#0f1316;
+	--card:#0f1416;
+	--muted:#9ca3af;
+	--text:#e6eef6;
+	--input-text: rgba(230,238,246,0.72);
+	--muted-2:#6b7280;
+	--accent-1:#4b2a86; /* darker, less saturated purple */
+	--accent-2:#5b3bb8;
+	--btn-grad-start:#35264d; /* deep muted indigo */
+	--btn-grad-mid:#5a3bd6;   /* mid tone for smooth blend */
+	--btn-grad-end:#7c4df0;   /* slightly brighter end */
+	--btn-color: #5b3bb8; /* fallback solid color for primary button */
+}
+body {
+    		font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    		background: linear-gradient(180deg, var(--bg) 0%, #0f1214 100%);
+			color: var(--input-text);
+    		min-height: 100vh;
+    		padding: 24px 16px;
+    		margin: 0;
+    	}
+    
+	.card {
+		background: linear-gradient(180deg, var(--card) 0%, #0c0f12 100%);
+		border-radius: 8px;
+		box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+		padding: 28px;
+		width: 100%;
+	}
+
+	.card h2 { margin: 0 0 14px 0; font-size: 18px }
+
+	.form-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 14px 18px;
+		align-items: start;
+	}
+
+	.field label { display:block; font-size:13px; color:var(--muted-2); font-weight:700 }
+	.field input, .field select, .field textarea {
+		width: 100%;
+		margin-top: 8px;
+		padding: 12px 14px;
+		border-radius: 10px;
+		border: 1px solid rgba(255,255,255,0.04);
+		background: #0b0f12;
+		color: var(--text);
+		-webkit-appearance: none;
+		appearance: none;
+		box-shadow: none;
+		transition: box-shadow .18s ease, border-color .18s ease, background-color .18s ease, color .12s ease;
+		background-clip: padding-box;
+		box-sizing: border-box;
+	}
+
+	/* Normalize focus state to avoid dark inner lines from browser default styles */
+	.field input:focus, .field select:focus, .field textarea:focus{
+		outline: none;
+		border-color: rgba(255,255,255,0.18);
+		box-shadow: 0 10px 28px rgba(0,0,0,0.55), 0 0 0 5px rgba(26, 26, 26, 0.1);
+	}
+
+	.field input::placeholder { color: rgba(230,238,246,0.28) }
+
+	.form-actions { margin-top: 8px }
+
+	.btn { padding:12px 16px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); cursor:pointer; background:transparent; color:var(--text); transition: all 180ms ease }
+	.btn.primary{ background: var(--btn-color); color:#fff; border:none; box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 -3px 8px rgba(0,0,0,0.24); border-radius:10px; padding:12px 20px; font-weight:700; letter-spacing:0.2px; transition: transform .18s ease, box-shadow .18s ease, filter .18s ease }
+	.btn.primary:hover{ transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.52), inset 0 -4px 10px rgba(0,0,0,0.28); filter: brightness(1.06) }
+	.btn.primary:active{ transform: translateY(0); box-shadow: 0 6px 16px rgba(0,0,0,0.40) }
+	.btn.primary:focus{ outline: 2px solid rgba(75,44,120,0.12); outline-offset: 3px }
+
+	/* make form primary button full-width and prominent */
+	.form-actions{ overflow: visible }
+	.form-actions .btn.primary{ width:auto; min-width:160px; padding:14px 28px; border-radius:10px; font-weight:700; box-shadow: 0 8px 22px rgba(0,0,0,0.36); transition:all 200ms ease }
+	.form-actions .btn.primary:disabled{ opacity:0.5; cursor:not-allowed; box-shadow:none }
+
+	.tabs { display:flex; gap:8px; margin-bottom:12px }
+	.tabs button{ padding:8px 12px; border-radius:8px; border:1px solid transparent; background:transparent }
+	.tabs button.active{ background:#eef2ff; border-color:#c7d2fe }
+
+	.tab-panel{ display:none }
+	.tab-panel.active{ display:block }
+
+	@media (max-width:720px){
+		.form-grid{ grid-template-columns: 1fr }
+	}
+.modal-actions{padding:12px 16px;text-align:right;border-top:1px solid rgba(0,0,0,0.06)}
+
+.modal-backdrop[aria-hidden="true"]{ display:none }
+.modal-backdrop{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(2,6,10,0.6); z-index:1000 }
+.modal{ width: min(760px, 95%); background: var(--panel); border-radius:12px; box-shadow: 0 30px 80px rgba(2,6,23,0.7); overflow:hidden; color:var(--text) }
+.modal-header{ padding:16px 18px; font-weight:700; background: linear-gradient(90deg,var(--accent-1),var(--accent-2)); color:#fff }
+.modal-body{ padding:14px 18px; max-height:68vh; overflow:auto; }
+.confirm-pre{
+	margin:0;
+	font-size:13px;
+	color:var(--text);
+	background:#071018;
+	padding:12px 14px;
+	border-radius:8px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+	white-space: pre-wrap;
+	word-break:break-word;
+	overflow:auto;
+	max-height:36vh;
+}
+/* JSON syntax highlighting inside confirm modal */
+.confirm-pre .json-key{ color: #c792ea; font-weight:700 }
+.confirm-pre .json-string{ color: #8fd19e }
+.confirm-pre .json-number{ color: #f78c6c }
+.confirm-pre .json-boolean{ color: #ffb86c }
+.confirm-pre .json-null{ color: #9ca3af; font-style:italic }
+.confirm-pre .json-punct{ color: #89ddff }
+.modal-actions{ padding:14px 18px; text-align:right; background:transparent }
+
+/* Narrower confirm modal */
+.modal.confirm-modal{ width: min(560px, 92%); }
+.btn.danger{ background: linear-gradient(90deg,#ef4444,#f97373); color:#fff; border:none }
+.btn.danger:hover{ filter:brightness(.96) }
+
+/* small screens tweaks */
+@media (max-width:600px){
+	.top{flex-direction:column;align-items:stretch}
+	.token-input{max-width:none}
+	.headerBar .tabsRow{ flex-direction:column; align-items:stretch }
+}
+
+/* Tabs */
+.tabs{display:flex;gap:8px;margin:18px 0 12px}
+.tab{background:transparent;padding:10px 14px;border-radius:12px;border:1px solid transparent;color:var(--muted);cursor:pointer;transition:all .18s ease}
+.tab:hover{background:rgba(255,255,255,0.02); transform: translateY(-1px)}
+.tab.active{color:#072a2f;border-color:rgba(0,0,0,0.06);background:linear-gradient(90deg,#dbeafe,#c7f2ff);box-shadow:0 10px 28px rgba(4,12,24,0.12);transform:translateY(-3px);font-weight:700}
+
+.tab-panels{margin-bottom:0}
+.tab-panel{display:none}
+.tab-panel[aria-hidden="false"]{display:block}
+
+.container{max-width:1120px;margin:12px auto;padding:0 16px}
+
+/* Form block: wrapper that holds header gradient + form body as a single visual unit */
+.formBlock{ width:100%; max-width:1120px; margin:0 auto; border-radius:12px; overflow: visible; box-shadow: 0 20px 60px rgba(2,6,23,0.6); background: var(--panel) }
+.headerBar{
+	padding: 18px 22px 14px 22px;
+	background: linear-gradient(90deg,#3b0764 0%, #5b21b6 45%, #7c3aed 100%);
+	color: #fff;
+}
+
+/* keep header corners rounded even if parent allows overflow */
+.headerBar{ border-top-left-radius:12px; border-top-right-radius:12px; overflow:hidden }
+.headerBar .top{ margin-bottom:10px }
+.headerBar .tabsRow {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+/* Style for header action buttons (Editar / Volver) */
+.header-actions .btn {
+	display:inline-flex;
+	align-items:center;
+	gap:8px;
+	padding:10px 14px;
+	border-radius:10px;
+	border:1px solid rgba(255,255,255,0.12);
+	background: rgba(255,255,255,0.12);
+	color: #fff;
+	text-decoration:none;
+	box-shadow: 0 8px 20px rgba(2,6,23,0.08);
+	transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.header-actions .btn:hover{ transform: translateY(-3px); box-shadow: 0 18px 40px rgba(2,6,23,0.12); background: rgba(255,255,255,0.18); }
+.header-actions .btn:active{ transform: translateY(-1px) }
+.header-actions .btn.secondary{ background: transparent; border-color: rgba(255,255,255,0.2); color:#fff }
+
+/* Autocomplete dropdown for title search */
+.autocomplete {
+	position: relative;
+}
+.autocomplete-list{
+	position: absolute;
+	left: 0; right: 0; z-index: 2200;
+	background: linear-gradient(180deg, rgba(20,24,27,0.98), var(--panel));
+	color: var(--text);
+	border: 1px solid rgba(255,255,255,0.06);
+	border-radius: 10px;
+	box-shadow: 0 20px 60px rgba(2,6,23,0.8);
+	max-height: 360px;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+	padding-bottom: 0; /* last-item spacing handled on item itself */
+}
+/* Hide the dropdown entirely when it has no items to avoid showing a thin border/line */
+.autocomplete-list:empty{
+	display: none;
+	border: none;
+	box-shadow: none;
+	max-height: 0;
+	padding: 0;
+	overflow: hidden;
+}
+.autocomplete-item{ padding:10px 12px; cursor:pointer; display:flex; gap:12px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.02) }
+.autocomplete-item:last-child{ border-bottom: none; padding-bottom: 18px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px }
+.autocomplete-item:last-child:hover{ border-bottom-left-radius: 10px; border-bottom-right-radius: 10px }
+.autocomplete-item:hover{ background: rgba(255,255,255,0.02) }
+.autocomplete-item .meta{ font-size:12px; color:var(--muted-2) }
+.autocomplete-item .title{ font-weight:700; font-size:14px; line-height:1.2; color: var(--text) }
+/* original title shown under the main title (smaller, normal weight) */
+.autocomplete-item .title .orig-title{ display:block; font-size:12px; font-weight:400; color:#6b7280; margin-top:6px }
+
+/* active (keyboard) state */
+.autocomplete-item.active{ background: rgba(255,255,255,0.03) }
+
+/* Poster thumbnail in autocomplete */
+.autocomplete-item img.ac-poster{ width:56px; height:80px; object-fit:cover; border-radius:6px; flex:0 0 56px; border:1px solid rgba(255,255,255,0.03) }
+.autocomplete-item .content{ display:flex; flex-direction:column }
+
+
+.headerBar h1{ margin:0; font-size:22px; font-weight:700 }
+.headerBar .tabs{ background: transparent; padding:0 }
+.headerBar .tab{ background: rgba(255,255,255,0.04); color: #fff; border:1px solid rgba(255,255,255,0.06); padding:8px 14px }
+.headerBar .tab.active{ background: rgba(255,255,255,0.08); box-shadow: 0 12px 34px rgba(60,22,120,0.28); transform: translateY(-3px); border-color: rgba(255,255,255,0.12); font-weight:700 }
+
+/* Inline message area (success / warning / error) */
+#msgArea{ display:none; margin: 12px 20px; padding: 12px 16px; border-radius: 12px; font-weight:700; box-shadow: 0 12px 30px rgba(2,6,23,0.12); }
+#msgArea.show{ display:block }
+
+/* Floating notification modal */
+@keyframes fm-fade-in{ from{ opacity:0; transform: translateY(-6px) scale(.996) } to{ opacity:1; transform: translateY(0) scale(1) } }
+@keyframes fm-fade-out{ from{ opacity:1; transform: translateY(0) scale(1) } to{ opacity:0; transform: translateY(-6px) scale(.996) } }
+
+.floatingMsg{ position:fixed; right:20px; top:20px; transform:none; width:min(380px,92%); z-index:2200; border-radius:10px; overflow:hidden; box-shadow: 0 20px 60px rgba(2,6,23,0.45); font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+.floatingMsg .fm-header{ padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:8px }
+.floatingMsg .fm-title{ font-weight:700; color:#fff }
+.floatingMsg .fm-close{ background:transparent; border:0; color:#fff; padding:6px 10px; border-radius:8px; cursor:pointer }
+.floatingMsg .fm-body{ background: linear-gradient(180deg,#071018,#0b0f12); color: var(--text) !important; padding:10px 12px; max-height:48vh; overflow:auto; font-size:13px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
+
+/* Confirm modal: use dark header and dark body to match admin theme */
+.modal.confirm-modal .modal-header{
+	background: var(--panel);
+	color: var(--text);
+	border-bottom: 1px solid rgba(255,255,255,0.04);
+	box-shadow: none;
+}
+.modal.confirm-modal .modal-body{ background: transparent; color: var(--text); }
+/* Ensure all plain text inside confirm modal body is readable in dark mode */
+.modal.confirm-modal .modal-body,
+.modal.confirm-modal .modal-body p,
+.modal.confirm-modal .modal-body div,
+.modal.confirm-modal .modal-body span,
+.modal.confirm-modal .modal-body a{
+	color: var(--muted) !important;
+}
+.modal.confirm-modal .confirm-pre{ background: #071018; color: var(--text); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02) }
+
+/* Floating messages used elsewhere should also respect dark theme when admin is dark */
+.floatingMsg .fm-body{ background: linear-gradient(180deg,#071018,#0b0f12); color: var(--text); }
+
+/* Neutral (dark) header for other confirmation-like modals when using .confirm-modal class */
+.modal.confirm-modal .modal-actions .btn{ background: rgba(255,255,255,0.03); color: var(--text); border:1px solid rgba(255,255,255,0.04) }
+.modal.confirm-modal .modal-actions .btn.primary{ background: var(--btn-color); color:#fff }
+
+/* Space buttons in confirm modal so they don't appear crowded */
+.modal.confirm-modal .modal-actions{
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 18px;
+	background: transparent;
+}
+
+.floatingMsg.success .fm-header{ background: linear-gradient(90deg,#06b6d4,#10b981) }
+.floatingMsg.error .fm-header{ background: linear-gradient(90deg,#fb7185,#ef4444) }
+.floatingMsg.warning .fm-header{ background: linear-gradient(90deg,#f97316,#f59e0b) }
+.floatingMsg.info .fm-header{ background: linear-gradient(90deg,#6366f1,#7c3aed) }
+
+.floatingMsg .fm-body pre{ margin:0; white-space:pre-wrap; word-break:break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; color: var(--text) !important; background: transparent; padding:8px 10px; border-radius:6px }
+
+/* overlay to dim background when floating message is visible */
+.floatingOverlay{ position:fixed; inset:0; background: rgba(2,6,23,0.45); backdrop-filter: blur(3px); z-index:2100 }
+
+/* animation helpers */
+.floatingMsg.enter{ animation: fm-fade-in 180ms ease-out both }
+.floatingMsg.leave{ animation: fm-fade-out 160ms ease-in both }
+
+/* ensure page title and header remain horizontally centered only */
+@media (max-width:720px){
+	.headerBar{ padding:14px }
+}
+
+/* small visual tweaks to match design */
+.top{margin-bottom:18px}
+.card{padding:28px}
+
+/* ensure field container can hold positioned icons/messages */
+.field{ position: relative }
+
+/* make the first card sit flush under the headerBar */
+.tab-panels > .tab-panel{ padding: 0 }
+.tab-panel .card{ margin-top: 0; border-top: none }
+
+/* hide debug log under the form by default */
+#out{ display:none !important }
+
+/* Validation styles: clearer error state with subtle tinted background, stronger shadow and readable message */
+.field.invalid input, .field.invalid select, .field.invalid textarea {
+	border: 1px solid #ef4444 !important;
+	box-shadow: 0 10px 28px rgba(239,68,68,0.14), inset 0 -3px 6px rgba(0,0,0,0.18);
+	background: rgba(239,68,68,0.02);
+	transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+	padding-right: 48px; /* room for an icon */
+}
+
+.field.invalid label{ color: #ef4444 }
+
+.field.invalid input:focus, .field.invalid select:focus, .field.invalid textarea:focus{
+	border-color: #ff6363;
+	box-shadow: 0 14px 36px rgba(239,68,68,0.18), 0 0 0 6px rgba(239,68,68,0.08);
+}
+
+.field .error-text{
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+	color: #fecaca;
+	font-size: 13px;
+	line-height: 1.2;
+	opacity: 0;
+	transform: translateY(-4px);
+	animation: error-fade-in .22s ease forwards;
+}
+.field .error-text::before{
+	content: '';
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	margin: 0;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ef4444' d='M1 21h22L12 2 1 21z'/><rect x='11' y='7' width='2' height='7' fill='%23ffffff'/><rect x='11' y='16' width='2' height='2' fill='%23ffffff'/></svg>");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 14px 14px;
+}
+
+/* small warning icon inside the input area (non-interactive) */
+.field.invalid label::after{ display:none }
+
+/* Use a small SVG warning icon as input background so it is vertically centered reliably */
+.field.invalid input, .field.invalid textarea, .field.invalid select {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ef4444' d='M1 21h22L12 2 1 21z'/><rect x='11' y='7' width='2' height='7' fill='%23ffffff'/><rect x='11' y='16' width='2' height='2' fill='%23ffffff'/></svg>");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	background-size: 14px 14px;
+}
+
+.field.invalid input::placeholder{ color: #f7caca }
+
+@keyframes error-fade-in{ to{ opacity:1; transform:translateY(0) } }

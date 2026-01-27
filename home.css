@@ -1,0 +1,99 @@
+:root{ --bg:#0b0f12; --panel:#0f1316; --text:#e6eef6; --muted:#9ca3af; --input-text: rgba(230,238,246,0.72); --accent-1:#4b2a86; --btn-color:#5b3bb8 }
+
+/* Header title and addon version */
+.headerBar .top{ display:flex; align-items:center; gap:12px }
+.headerBar .top h1{ margin:0; font-size:20px; color:var(--text); font-weight:700 }
+.headerBar .top h1 .addon-version{ font-size:13px; font-weight:400; color:var(--muted); margin-left:8px }
+.headerBar .top .admin-btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background: rgba(255,255,255,0.03); color:var(--text); font-weight:600; font-size:13px; text-decoration:none; border:1px solid rgba(255,255,255,0.03); margin-left:auto }
+.headerBar .top .admin-btn:hover{ background: rgba(255,255,255,0.05); transform: translateY(-1px) }
+
+/* Page-specific layout for the home index */
+.home-columns{ display:flex; gap:20px; align-items:flex-start }
+.home-left{ flex: 1 1 0 }
+.home-right{ width:360px; flex: 0 0 360px; padding:18px 14px; font-size:13px }
+
+/* Use Poppins for the home UI to match requested font */
+body, .formBlock, .home-columns, .home-right, .home-left{ font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+
+.home-left h2, .home-right h2{ margin:0 0 12px 0; color:var(--text); font-size:16px }
+
+.home-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px }
+.home-item{ position:relative; border-radius:10px; overflow:hidden; background: transparent; box-shadow: 0 6px 18px rgba(2,6,23,0.5); cursor:pointer; transition: transform .16s ease, box-shadow .16s ease }
+.home-item:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(2,6,23,0.6) }
+.home-item .posterWrap{ width:100%; height:340px; overflow:hidden; display:block; border-radius:8px }
+.home-item img{ width:100%; height:100%; object-fit:cover; display:block }
+ .home-item .badge{ position:absolute; left:12px; top:12px; background: linear-gradient(90deg,var(--btn-color),#7c4df0); color:#fff; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600; box-shadow: 0 8px 18px rgba(2,6,23,0.45); border:1px solid rgba(255,255,255,0.04); transform: translateZ(0) }
+.home-item .badge::after{ content:''; position:absolute; inset:0; border-radius:999px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); pointer-events:none }
+.home-item .titleBar{ padding:12px 14px; background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.72)); position:absolute; left:0; right:0; bottom:0; backdrop-filter: blur(2px) }
+.home-item .title{ color:var(--text); font-weight:700; font-size:13px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; text-shadow: 0 6px 18px rgba(0,0,0,0.75) }
+.home-item{ /* entrance animation: only fade (slower) */
+	opacity:0;
+	transform: none;
+	transition: opacity .8s cubic-bezier(.2,.9,.25,1), transform .16s ease;
+	will-change: opacity, transform;
+}
+.home-item.visible{ opacity:1 }
+.home-item .meta{ display:none }
+
+/* Manifest panel */
+#manifestForm label{ display:block; color:var(--muted); font-weight:700; margin-top:8px }
+#manifestForm input, #manifestForm select{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:#0b0f12; color:var(--input-text); margin-top:6px }
+#manifestForm .help{ font-size:12px; color:var(--muted); margin-top:6px }
+#manifestForm .controls{ display:flex; gap:8px; align-items:center }
+#manifestForm .manifest-output{ background: transparent; border: 1px solid rgba(255,255,255,0.04); padding:12px; border-radius:8px; max-height:320px; overflow:auto; color:var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace; font-size:13px }
+
+/* Disabled state for generate button */
+.btn[disabled]{ opacity:0.5; cursor:not-allowed; transform:none }
+
+/* small toolbar for manifest actions */
+.manifest-toolbar{ display:flex; gap:8px; margin-top:8px }
+
+.manifest-status{ font-size:13px; color:var(--muted); margin-top:8px }
+
+/* Ready panel shown after generation */
+.manifest-ready{
+	border: 1px dashed rgba(91,59,184,0.18);
+	padding:18px;
+	border-radius:10px;
+	background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+}
+.manifest-ready .mr-title{ font-weight:700; color:var(--text); text-align:center; margin-bottom:8px; font-size:15px }
+.manifest-ready .mr-sub{ color:var(--muted); text-align:center; margin-bottom:14px; font-size:13px }
+.manifest-ready .mr-actions{ display:flex; flex-direction:column; gap:12px }
+.manifest-ready .mr-actions .btn{ width:100%; padding:14px; font-weight:700; border-radius:10px }
+.manifest-ready .btn.copy{ background: linear-gradient(90deg,var(--btn-color),#7c4df0); color:#fff; border:none }
+.manifest-ready .btn.open{ background: rgba(255,255,255,0.03); color:var(--text); border:1px solid rgba(255,255,255,0.06) }
+.manifest-ready .mr-note{ font-size:13px; color:var(--muted); margin-top:12px; text-align:center }
+
+/* Make the generate button occupy full width and have larger padding */
+#generateBtn{ width:100%; padding:16px 18px; font-size:15px; min-height:48px }
+
+/* For the manifest form, avoid showing the red outline on invalid token input; show inline message instead */
+#manifestForm .field.invalid input{ border-color: rgba(255,255,255,0.06) !important; box-shadow: none !important; background: #0b0f12 !important }
+#manifestForm .field.invalid label{ color: var(--muted) !important }
+#manifestForm .field .error-text{ color: #fecaca; }
+
+/* Buttons */
+#manifestForm .btn{ padding:8px 12px }
+
+/* Responsive */
+@media (max-width:900px){ .home-columns{ flex-direction:column } .home-right{ width:100%; flex: 1 1 0 } .home-grid{ grid-template-columns: repeat(2,1fr) } }
+@media (max-width:600px){ .home-grid{ grid-template-columns: repeat(1,1fr) } }
+
+/* Loading skeletons + spinner */
+.skeleton-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px }
+.skeleton-item{ position:relative; border-radius:10px; overflow:hidden; background: transparent; box-shadow: 0 6px 18px rgba(2,6,23,0.35); min-height:340px }
+.skeleton-poster{ width:100%; height:340px; background:linear-gradient(90deg, #0e1113, #151719, #0e1113); background-size:300% 100%; animation: shimmer 1.8s ease-in-out infinite; will-change: background-position; transition: opacity .18s ease; border-radius:8px 8px 0 0; display:block }
+.skeleton-item .titleBar{ padding:12px 14px; background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.72)); position:absolute; left:0; right:0; bottom:0; box-sizing:border-box }
+.skeleton-item .titleBar .skeleton-line{ height:10px; margin:6px 0; border-radius:6px }
+.skeleton-line{ background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); background-size:300% 100%; animation: shimmer 1.8s ease-in-out infinite }
+.skeleton-line.short{ width:50%; }
+.skeleton-badge{ position:absolute; left:12px; top:12px; width:64px; height:26px; border-radius:999px; background: rgba(255,255,255,0.03); box-shadow: none }
+
+.spinner{ width:36px; height:36px; border-radius:50%; border:4px solid rgba(255,255,255,0.04); border-top-color:rgba(255,255,255,0.12); animation: spin 1s linear infinite; margin:28px auto; display:block }
+
+@keyframes shimmer{ 0%{ background-position:150% 0 } 50%{ background-position:0% 0 } 100%{ background-position:-150% 0 } }
+@keyframes spin{ to{ transform: rotate(360deg) } }
+
+@media (max-width:900px){ .skeleton-grid{ grid-template-columns: repeat(2,1fr) } }
+@media (max-width:600px){ .skeleton-grid{ grid-template-columns: repeat(1,1fr) } }

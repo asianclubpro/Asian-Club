@@ -1,0 +1,82 @@
+/* list.css - styles specific to listing page */
+.list-table{ width: 100%; border-collapse:collapse; min-width:720px; background: transparent }
+.list-table thead th{
+	text-align:left;
+	padding:12px 14px;
+	color: var(--muted-2);
+	font-weight:700;
+	font-size:13px;
+	border-bottom:1px solid rgba(255,255,255,0.06);
+	background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+}
+.list-table tbody td{
+	padding:12px 14px;
+	border-bottom:1px solid rgba(255,255,255,0.02);
+	vertical-align:middle;
+	font-size:14px;
+	color: var(--input-text);
+}
+.row-actions button{ margin-right:8px }
+.thumbnail{ width:64px; height:36px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.04) }
+.empty-state{ padding:28px; color:var(--muted-2) }
+@media (max-width:900px){ .list-table{ min-width:600px } }
+
+
+
+/* Table wrapper: center the table when it's narrower than the container, but allow horizontal scroll when wider */
+/* Table wrapper: allow horizontal scroll when table is wider than the card */
+#tableWrap{ margin-top:12px; overflow:auto }
+
+/* Extra bottom padding for the page container so card never touches viewport bottom */
+.container { padding-bottom: 50px; }
+
+@media (max-width:600px){
+	.container { padding-bottom: 96px; }
+}
+
+/* Apply contact-form style to list page cards/inputs in dark theme */
+body.dark-theme .card{ border-radius:14px; background: linear-gradient(180deg,#0f1113,#0c0d0e); border:1px solid rgba(255,255,255,0.02); box-shadow: 0 18px 48px rgba(2,6,23,0.32); }
+body.dark-theme .field input, body.dark-theme .field select, body.dark-theme .field textarea{ background:#0d0f11; border:1px solid rgba(255,255,255,0.03); color:#e6eef6; border-radius:10px; padding:12px 14px; height:44px }
+
+/* Style the search input and limit select in the list page to match dark theme */
+#search{ background: #0d0f11; border:1px solid rgba(255,255,255,0.06); color: var(--input-text); padding:10px 12px; border-radius:10px; height:44px }
+#search::placeholder{ color: rgba(230,238,246,0.28) }
+#limit{ background: #0d0f11; border:1px solid rgba(255,255,255,0.06); color: var(--input-text); padding:10px 12px; border-radius:10px; height:44px }
+
+/* Keep the same darker border when focusing the search input (avoid bright white focus ring) */
+#search:focus, #search:focus-visible{
+	outline: none;
+	border-color: rgba(255,255,255,0.08);
+	box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 0 4px rgba(91,59,184,0.06);
+}
+
+/* Top controls layout: prevent wrapping and ensure proper shrinking/alignment */
+.card > .top{ display:flex; gap:12px; align-items:center; flex-wrap:nowrap }
+.card > .top #search{ flex: 1 1 auto; min-width: 0; }
+.card > .top #limit{ flex: 0 0 auto; min-width:64px; width:auto }
+.card > .top #refresh{ flex: 0 0 auto }
+
+/* Override any inline borders from HTML with higher priority to enforce dark theme */
+#search, #limit{ border: 1px solid rgba(255,255,255,0.06) !important; background: #0d0f11 !important; color: var(--input-text) !important }
+
+/* Ensure buttons align with inputs */
+.card > .top .btn{ height:44px; display:inline-flex; align-items:center; padding:10px 14px; white-space:nowrap }
+.card > .top .btn:not(.primary){ background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); color: var(--input-text) }
+
+/* Header row separation: make headers visually distinct from data */
+.list-table thead th{ letter-spacing: .2px; text-transform: none }
+
+/* Table row hover for clarity */
+.list-table tbody tr:hover{ background: rgba(255,255,255,0.02) }
+
+/* Make action buttons clearly look like buttons */
+.row-actions .btn{ background: rgba(255,255,255,0.03); color: var(--text); border: 1px solid rgba(255,255,255,0.04); padding:8px 10px; border-radius:8px; box-shadow: none }
+.row-actions .btn:hover{ background: rgba(255,255,255,0.06); transform: translateY(-1px) }
+.row-actions .btn.primary{ background: var(--btn-color); color: #fff; border: none }
+
+/* Ensure action buttons remain on a single line and don't wrap */
+.row-actions{ white-space: nowrap }
+.row-actions .btn{ display: inline-flex; align-items: center; gap: 6px }
+.row-actions .btn + .btn{ margin-left: 8px }
+/* keep primary button prominent but not full-width */
+body.dark-theme .form-actions .btn.primary{ width:auto; min-width:140px; padding:12px 16px; border-radius:12px; background: linear-gradient(90deg,#7c3aed,#9f7aea); box-shadow: 0 12px 30px rgba(124,58,237,0.14) }

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Asian Club — Inicio</title>
+  <link rel="stylesheet" href="/admin/add.css">
+  <link rel="stylesheet" href="/home.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="formBlock">
+      <header class="headerBar">
+        <div class="top">
+          <h1>Asian Club <span id="addonVersion" class="addon-version">Home</span></h1>
+          <a href="/admin" class="admin-btn" title="Admin panel" aria-label="Admin panel">Admin panel</a>
+        </div>
+      </header>
+
+      <div class="card" style="padding:18px">
+        <div class="home-columns">
+          <section class="home-left">
+            <h2>Recently added</h2>
+            <div id="latestGrid" class="home-grid">
+              <!-- initial skeletons for faster first paint -->
+              <div class="skeleton-item">
+                <div class="skeleton-poster"></div>
+                <div class="skeleton-badge"></div>
+                <div class="titleBar"><div class="skeleton-line short"></div><div class="skeleton-line"></div></div>
+              </div>
+              <div class="skeleton-item">
+                <div class="skeleton-poster"></div>
+                <div class="skeleton-badge"></div>
+                <div class="titleBar"><div class="skeleton-line short"></div><div class="skeleton-line"></div></div>
+              </div>
+              <div class="skeleton-item">
+                <div class="skeleton-poster"></div>
+                <div class="skeleton-badge"></div>
+                <div class="titleBar"><div class="skeleton-line short"></div><div class="skeleton-line"></div></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="home-right">
+            <h2>Generate manifest</h2>
+            <form id="manifestForm">
+              <label>Provider</label>
+              <select id="service" name="service">
+                <option value="realdebrid">RealDebrid</option>
+                <option value="torbox">Torbox</option>
+              </select>
+
+              <label>Token</label>
+              <div class="field">
+                <input id="token" name="token" placeholder="Enter token (e.g. abc123)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              </div>
+
+              <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                <button id="generateBtn" class="btn primary">Generate</button>
+              </div>
+
+              <div id="manifestPanelArea" style="margin-top:14px"></div>
+            </form>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/home.js"></script>
+  <script>
+    (async function(){
+      try{
+        const res = await fetch('/manifest.json');
+        if (!res.ok) return;
+        const json = await res.json();
+        const el = document.getElementById('addonVersion');
+        if (el && json && json.version){
+          const v = (typeof json.version === 'string' && /^v/i.test(json.version)) ? json.version : `v${json.version}`;
+          el.textContent = v;
+        }
+      }catch(e){ /* ignore */ }
+    })();
+  </script>
+</body>
+</html>

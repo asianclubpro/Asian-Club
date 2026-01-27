@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Admin — Añadir contenido</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/admin/add.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="formBlock">
+      <header class="headerBar">
+        <div class="top">
+          <h1 id="pageTitle">Panel de administración — Contenido</h1>
+          <!-- admin token is provided automatically after login; no user input required -->
+        </div>
+
+        <!-- Tabs and header actions row -->
+        <div class="tabsRow">
+          <nav class="tabs" role="tablist" aria-label="Añadir contenido">
+            <button class="tab" data-tab="movie" role="tab">Película</button>
+            <button class="tab" data-tab="series" role="tab">Serie</button>
+            <button class="tab" data-tab="episode" role="tab">Episodio</button>
+          </nav>
+          <div class="header-actions" style="margin-left:12px">
+            <a href="/admin/list.html" class="btn">Editar</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- message area for success/error notifications -->
+      <div id="msgArea" role="status" aria-live="polite" style="display:none"></div>
+
+      <div class="tab-panels">
+        <section id="panel-movie" class="tab-panel" role="tabpanel">
+          <form id="movieForm" class="card form-grid">
+            <div class="field">
+              <label>ID
+                <input name="id" required placeholder="tt1234567">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Título
+                <input name="title" required placeholder="Título de la película">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Calidad
+                <select name="quality" required>
+                  <option>1080p WEB-DL</option>
+                  <option>1080p WEB-Rip</option>
+                  <option>1080p Bluray</option>
+                  <option>1080p | WEB-DL | AAC 5.1</option>
+                  <option>1080p | WEB-DL | AAC</option>
+                  <option>720p WEB-DL</option>
+                  <option>720p WEB-Rip</option>
+                  <option>720p Bluray</option>
+                  <option>720p | WEB-DL | AAC 5.1</option>
+                  <option>720p | WEB-DL | AAC</option>
+                  <option>480p DVDRip</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Idioma
+                  <select name="language" required>
+                    <option>🇺🇸 English</option>
+                    <option>🇯🇵 Japanese</option>
+                    <option>🇰🇷 Korean</option>
+                    <option>🇨🇳 Chinese</option>
+                    <option>🇮🇩 Indonesian</option>
+                    <option>🇫🇷 French</option>
+                    <option>🇮🇹 Italian</option>
+                    <option>🇩🇪 German</option>
+                  </select>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Códec
+                <select name="codec" required>
+                  <option>h264</option>
+                  <option>h265</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Hash
+                <input name="hash" required placeholder="SHA1 (hex)">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Póster URL
+                <input name="poster" required placeholder="https://...jpg">
+              </label>
+            </div>
+
+            <div class="form-actions" style="grid-column:1 / -1; text-align:left;">
+              <button type="submit" class="btn primary">Agregar</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="panel-series" class="tab-panel" role="tabpanel" aria-hidden="true">
+          <form id="seriesForm" class="card form-grid">
+            <div class="field">
+              <label>ID
+                <input name="id" required placeholder="tt1234567">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Título
+                <input name="title" required placeholder="Título de la serie">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Póster URL
+                <input name="poster" required placeholder="https://...jpg">
+              </label>
+            </div>
+
+            <div class="form-actions" style="grid-column:1 / -1; text-align:left;">
+              <button type="submit" class="btn primary">Agregar</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="panel-episode" class="tab-panel" role="tabpanel" aria-hidden="true">
+          <form id="episodeForm" class="card form-grid">
+            <div class="field">
+              <label>ID (formato: seriesId:temporada:episodio)
+                <input name="id" required placeholder="tt1234567:1:2">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Título
+                <input name="title" required placeholder="Título del episodio">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Temporada
+                <input name="season" type="number" required placeholder="1">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Episodio
+                <input name="episode" type="number" required placeholder="1">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Calidad
+                <select name="quality" required>
+                  <option>1080p WEB-DL</option>
+                  <option>1080p WEB-Rip</option>
+                  <option>1080p Bluray</option>
+                  <option>1080p | WEB-DL | AAC 5.1</option>
+                  <option>1080p | WEB-DL | AAC</option>
+                  <option>720p WEB-DL</option>
+                  <option>720p WEB-Rip</option>
+                  <option>720p Bluray</option>
+                  <option>720p | WEB-DL | AAC 5.1</option>
+                  <option>720p | WEB-DL | AAC</option>
+                  <option>480p DVDRip</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Idioma
+                <select name="language" required>
+                  <option>🇺🇸 English</option>
+                  <option>🇯🇵 Japanese</option>
+                  <option>🇰🇷 Korean</option>
+                  <option>🇨🇳 Chinese</option>
+                  <option>🇮🇩 Indonesian</option>
+                  <option>🇫🇷 French</option>
+                  <option>🇮🇹 Italian</option>
+                  <option>🇩🇪 German</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Códec
+                <select name="codec" required>
+                  <option>h264</option>
+                  <option>h265</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Hash
+                <input name="hash" required placeholder="SHA1 o SHA256 (hex)">
+              </label>
+            </div>
+
+            <div class="field">
+              <label>Póster URL
+                <input name="poster" required placeholder="https://...jpg">
+              </label>
+            </div>
+
+            <div class="form-actions" style="grid-column:1 / -1; text-align:left;">
+              <button type="submit" class="btn primary">Agregar</button>
+            </div>
+          </form>
+        </section>
+
+      </div>
+
+      <pre id="out"></pre>
+    </div>
+  </div>
+
+      <!-- Confirmation modal (hidden by default) -->
+      <div id="confirmModal" class="modal-backdrop" aria-hidden="true">
+        <div class="modal confirm-modal">
+          <div class="modal-header">Confirmar envío</div>
+          <div class="modal-body">
+            <pre id="confirmBody" class="confirm-pre"></pre>
+            <div><a href="#" id="confirmToggleDetails" style="font-size:13px;color:#6b7280">Mostrar detalles</a></div>
+          </div>
+          <div class="modal-actions">
+            <button id="confirmYes" class="btn primary">Aceptar</button>
+            <button id="confirmNo" class="btn">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <script src="/admin/add.js"></script>
+    </body>
+
+    </html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin — Listar / Editar</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/admin/add.css">
+  <link rel="stylesheet" href="/admin/list.css">
+</head>
+<body>
+  <div class="container">
+    <div class="formBlock">
+      <header class="headerBar">
+        <div class="top">
+          <h1>Panel de administración — Listar contenido</h1>
+        </div>
+        <div class="tabsRow">
+          <nav class="tabs" role="tablist" aria-label="Ver contenido">
+            <button class="tab" data-tab="movies" role="tab">Películas</button>
+            <button class="tab" data-tab="series" role="tab">Series</button>
+            <button class="tab" data-tab="episodes" role="tab">Episodios</button>
+          </nav>
+          <div class="header-actions">
+            <a href="/admin/add.html" class="btn">Agregar</a>
+          </div>
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="top" style="display:flex;gap:12px;align-items:center;">
+          <input id="search" placeholder="Buscar por ID o título" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid #e6e9ef" />
+          <select id="limit" style="padding:10px 12px;border-radius:10px;border:1px solid #e6e9ef">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button id="refresh" class="btn">Actualizar</button>
+        </div>
+
+        <div id="tableWrap" style="margin-top:12px;overflow:auto">
+          <table id="listTable" class="list-table">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <div>
+            <button id="prevPage" class="btn">Anterior</button>
+            <button id="nextPage" class="btn">Siguiente</button>
+          </div>
+          <div id="pagingInfo" style="color:#6b7280;font-size:13px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit modal -->
+  <div id="editModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" style="width:min(760px,95%)">
+      <div class="modal-header">Editar registro</div>
+      <div class="modal-body">
+        <form id="editForm">
+          <div id="editFields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+        </form>
+      </div>
+      <div class="modal-actions">
+        <button id="saveEdit" class="btn primary">Guardar</button>
+        <button id="cancelEdit" class="btn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/admin/shared.js"></script>
+  <script src="/admin/list.js"></script>
+</body>
+</html>
