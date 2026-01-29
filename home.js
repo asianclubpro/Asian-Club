@@ -17,7 +17,7 @@
       const movies = mJson.metas || [];
       const series = sJson.metas || [];
       // combine, prefer movies first (keep order as provided by server)
-      const combined = movies.concat(series).slice(0,20);
+      const combined = movies.concat(series).slice(0,15);
       return combined;
     }catch(e){ console.warn('Error fetching catalogs', e); return [] }
   }

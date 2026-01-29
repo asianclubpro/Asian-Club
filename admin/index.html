@@ -2,14 +2,29 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel Admin · Primer Latino</title>
+  <link rel="stylesheet" href="/admin/login.css">
+</head>
 
+<body>
+  <main>
+    <section id="loginSection" class="login-card">
+      <h1>Panel Admin</h1>
+      <p class="muted">Asian Club</p>
+      <form id="loginForm" autocomplete="off" onsubmit="return false;">
+        <input type="email" id="email" name="email" placeholder="Correo" autocomplete="email" required>
+        <input type="password" id="password" name="password" placeholder="Contraseña" autocomplete="new-password" required>
+        <button id="loginBtn" type="submit" class="btn primary">Entrar</button>
+        <div id="msg" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+</body>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDHCerO4kSlT4xftQFSTFmNWqlVXrP7ytQ",
@@ -22,391 +37,38 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
 
-    // EmailJS
-    const EMAILJS_SERVICE_ID = "service_7uozjxe";
-    const EMAILJS_TEMPLATE_ID = "template_hzoe7z4";
-    const EMAILJS_PUBLIC_KEY = "f0AIcX0oEVX84gsyz";
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    const loginForm = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
 
-    const loginSection = document.getElementById("loginSection");
-    const panelSection = document.getElementById("panelSection");
-    const msg = document.getElementById("msg");
-    const lista = document.getElementById("lista");
-
-    window.login = function () {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      if (!email || !password) return msg.textContent = "Completa los campos";
-      msg.textContent = "Entrando…";
-      signInWithEmailAndPassword(auth, email, password)
-        .catch(() => msg.textContent = "Correo o contraseña incorrecta");
-    };
-
-    window.logout = () => signOut(auth);
-
-    onAuthStateChanged(auth, async user => {
-      if (user) {
-        try {
-          // exchange firebase ID token for server admin token
-          const idToken = await user.getIdToken();
-          const resp = await fetch('/admin/issue-token', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken }, body: JSON.stringify({}) });
-          if(resp.ok){
-            const j = await resp.json();
-            if(j && j.admin_token){
-              localStorage.setItem('admin_token', j.admin_token);
-              // after successful token exchange, redirect to the add content page
-              window.location.href = '/admin/add.html';
-              return;
-            }
-          } else {
-            console.warn('Issue-token failed', resp.status);
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) { msg.textContent = 'Completa los campos'; return; }
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const idToken = await cred.user.getIdToken();
+        const resp = await fetch('/admin/issue-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+          body: JSON.stringify({})
+        });
+        if (resp.ok) {
+          const j = await resp.json();
+          if (j && j.admin_token) {
+            localStorage.setItem('admin_token', j.admin_token);
+            window.location.href = '/admin/add.html';
+            return;
           }
-        } catch (e) { console.warn('token exchange error', e && e.message); }
-
-        document.body.classList.add("logged-in");
-        loginSection.style.display = "none";
-        panelSection.style.display = "flex";
-        cargarPeticiones();
-      } else {
-        document.body.classList.remove("logged-in");
-        loginSection.style.display = "block";
-        panelSection.style.display = "none";
-        lista.innerHTML = "";
+        }
+        msg.textContent = 'No se pudo obtener token admin';
+      } catch (err) {
+        console.warn('login error', err);
+        msg.textContent = 'Correo o contraseña incorrecta';
       }
     });
-
-    function cargarPeticiones() {
-      const q = query(collection(db, "peticiones"), orderBy("fecha", "desc"));
-      onSnapshot(q, snapshot => {
-        if (snapshot.empty) {
-          lista.innerHTML = "<p style='text-align:center;color:#999;padding:60px;font-size:1.2rem;'>No hay peticiones pendientes ❤️</p>";
-          return;
-        }
-
-        let html = `
-          <table>
-            <tr>
-              <th>Título</th>
-              <th>Tipo</th>
-              <th>Año</th>
-              <th>TMDB</th>
-              <th>Magnet</th>
-              <th>Correo</th>
-              <th>Acciones</th>
-            </tr>`;
-
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
-          const id = docSnap.id;
-
-          html += `
-            <tr>
-              <td class="titulo"><strong>${d.titulo || "Sin título"}</strong></td>
-              <td>${d.tipo || "—"}</td>
-              <td>${d.anio || "—"}</td>
-              <td>${d.tmdb || "—"}</td>
-              <td>${d.magnet ? "Sí" : "—"}</td>
-              <td>${d.correo || "—"}</td>
-              <td>
-                <div class="acciones">
-                  <button class="aceptar" onclick="aceptar('${id}', '${d.titulo || ""}', '${d.correo || ""}')">Aceptar</button>
-                  <button class="revision" onclick="revision('${id}')">Revisión</button>
-                  <button class="rechazar" onclick="eliminar('${id}')">Eliminar</button>
-                </div>
-              </td>
-            </tr>`;
-        });
-
-        html += `</table>`;
-        lista.innerHTML = html;
-      });
-    }
-
-    window.aceptar = async (id, titulo, correo) => {
-      if (!confirm("¿Aceptar esta petición?")) return;
-      await updateDoc(doc(db, "peticiones", id), { estado: "aceptada", procesadoPor: auth.currentUser.email });
-      if (correo && correo.includes("@")) {
-        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: correo, titulo })
-          .then(() => alert("¡Aceptada + Email enviado!"))
-          .catch(() => alert("Aceptada, pero falló el email"));
-      } else {
-        alert("¡Aceptada!");
-      }
-    };
-
-    window.revision = async (id) => {
-      if (!confirm("¿Marcar como en revisión?")) return;
-      await updateDoc(doc(db, "peticiones", id), { estado: "revision" });
-      alert("Marcada como revisión");
-    };
-
-    window.eliminar = async (id) => {
-      if (!confirm("¿ELIMINAR esta petición para siempre?")) return;
-      await deleteDoc(doc(db, "peticiones", id));
-      alert("Petición eliminada");
-    };
   </script>
-
-  <style>
-    :root {
-      --bg: #f7f7f8;
-      --card: #ffffff;
-      --accent: #ff2e7f;
-      --success: #00d26a;
-      --warn: #ffa502;
-      --error: #ff4757;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Inter", sans-serif;
-    }
-
-    body {
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      transition: all 0.3s;
-    }
-
-    body.logged-in {
-      align-items: flex-start;
-      padding: 0;
-    }
-
-    #loginSection {
-      width: 100%;
-      max-width: 380px;
-      background: var(--card);
-      padding: 48px 36px;
-      border-radius: 28px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-      text-align: center;
-    }
-
-    #loginSection h1 {
-      font-size: 2rem;
-      font-weight: 900;
-      margin-bottom: 8px;
-      color: #1a1a1a;
-    }
-
-    #loginSection p {
-      color: #777;
-      margin-bottom: 32px;
-      font-size: 1.1rem;
-    }
-
-    #loginSection input {
-      width: 100%;
-      padding: 18px;
-      margin-bottom: 18px;
-      border: 2px solid #e0e0e0;
-      border-radius: 18px;
-      font-size: 1.1rem;
-      background: #f9f9f9;
-      transition: 0.3s;
-    }
-
-    #loginSection input:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: white;
-    }
-
-    #loginSection button {
-      width: 100%;
-      padding: 18px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 18px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    #msg {
-      margin-top: 16px;
-      color: var(--error);
-      font-weight: 600;
-      min-height: 24px;
-      font-size: 1rem;
-    }
-
-    #panelSection {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-      width: 100%;
-    }
-
-    .topbar {
-      background: var(--card);
-      border-bottom: 1px solid #e3e3e3;
-      padding: 18px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .logout {
-      background: var(--accent);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 700;
-      border: none;
-      font-size: 1rem;
-    }
-
-    .content {
-      padding: 16px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      font-size: 0.9rem;
-    }
-
-    th {
-      background: #1a1a1a;
-      color: white;
-      padding: 12px 8px;
-      text-align: left;
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-
-    td {
-      padding: 12px 8px;
-      border-bottom: 1px solid #333;
-      vertical-align: middle;
-    }
-
-    .titulo {
-      max-width: 180px;
-      word-wrap: break-word;
-    }
-
-    .acciones {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      flex-wrap: nowrap;
-    }
-
-    .aceptar {
-      background: var(--success);
-      color: white;
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.8rem;
-      white-space: nowrap;
-    }
-
-    .revision {
-      background: var(--warn);
-      color: white;
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.8rem;
-      white-space: nowrap;
-    }
-
-    .rechazar {
-      background: var(--error);
-      color: white;
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.8rem;
-      white-space: nowrap;
-    }
-
-    @media (max-width: 768px) {
-      #loginSection {
-        padding: 40px 28px;
-      }
-
-      .content {
-        padding: 10px;
-      }
-
-      th,
-      td {
-        padding: 8px 6px;
-        font-size: 0.8rem;
-      }
-
-      .titulo {
-        max-width: 120px;
-      }
-
-      .acciones {
-        gap: 4px;
-      }
-
-      .aceptar,
-      .revision,
-      .rechazar {
-        padding: 5px 8px;
-        font-size: 0.75rem;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <div id="loginSection">
-    <h1>Panel Admin</h1>
-    <p>Primer Latino</p>
-    <input type="email" id="email" placeholder="Correo" />
-    <input type="password" id="password" placeholder="Contraseña" />
-    <button onclick="login()">Entrar</button>
-    <div id="msg"></div>
-  </div>
-
-  <div id="panelSection">
-    <div class="topbar">
-      <h2>Peticiones</h2>
-      <button class="logout" onclick="logout()">Salir</button>
-    </div>
-    <div class="content">
-      <div id="lista">Cargando peticiones…</div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-</body>
 
 </html>
