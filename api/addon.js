@@ -35,7 +35,7 @@ const manifest = {
   version: "0.0.2",
   name: "Asian Club",
   description: "Gems of Asian cinema in one place.",
-  logo: "/logo.png",
+  logo: "https://asian-club-production.up.railway.app/logo.png",
   types: ["movie", "series"],
   resources: ["catalog", "meta", "stream"],
   catalogs: [
