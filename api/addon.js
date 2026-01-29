@@ -24,22 +24,6 @@ function loadJSON(filename) {
   return JSON.parse(fs.readFileSync(filePath, "utf-8"));
 }
 
-// CARGAR JSONs
-//let movies = [], seriesList = [], episodes = [];
-//try {
-//  const mData = loadJSON("movies.json");
- // const sData = loadJSON("series.json");
-  //const eData = loadJSON("episodes.json");
-
-  //movies = mData.movies || mData || [];
-  //seriesList = sData.series || sData || [];
-  //episodes = eData.episodes || eData || [];
-
-  //console.log(`✅ PRIMER LATINO CARGADO (JSON) → ${movies.length} películas | ${seriesList.length} series | ${episodes.length} episodios`);
-//} catch (err) {
- // console.error("ERROR CRÍTICO CARGANDO JSONs:", err.message);
-//}
-
 // Prefer DB when DATABASE_URL is configured. Keep JSON as fallback.
 const db = require('./db');
 const useDb = Boolean(process.env.DATABASE_URL);
@@ -48,11 +32,10 @@ if (useDb) console.log('DB mode enabled: addon will read content from Postgres')
 // MANIFEST (sin cambios)
 const manifest = {
   id: "org.asianclub.addon",
-  version: "0.0.1",
+  version: "0.0.2",
   name: "Asian Club",
   description: "Gems of Asian cinema in one place.",
-  logo: "",
-  background: "",
+  logo: "/logo.png",
   types: ["movie", "series"],
   resources: ["catalog", "meta", "stream"],
   catalogs: [
