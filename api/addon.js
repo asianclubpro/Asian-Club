@@ -76,7 +76,7 @@ if (useDb) console.log('DB mode enabled: addon will read content from Postgres')
 // MANIFEST (sin cambios)
 const manifest = {
   id: "org.asianclub.addon",
-  version: "0.0.2",
+  version: "0.0.3",
   name: "Asian Club",
   description: "Gems of Asian cinema in one place.",
   logo: "https://asian-club-production.up.railway.app/logo.png",
