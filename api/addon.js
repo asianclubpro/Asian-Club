@@ -2,6 +2,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
@@ -11,6 +12,44 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
   res.type("application/json");
+  next();
+});
+
+// Mask token-in-URL (redact it) and map Authorization header + X-Service into params for compatibility
+app.use((req, res, next) => {
+  try {
+    const orig = req.originalUrl || req.url || '';
+    // pattern captures service and token value
+    const tokenInUrlRe = /\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/ig;
+    if (tokenInUrlRe.test(orig)) {
+      // replace token with a redacted marker (keep service name)
+      const redacted = orig.replace(tokenInUrlRe, (m, svc, t) => `/${svc}=[REDACTED:${tokenHash(t)}]`);
+      // update req.url / req.originalUrl so internal loggers see redacted URL
+      try {
+        req._rawOriginalUrl = orig;
+        req.url = redacted;
+        req.originalUrl = redacted;
+      } catch (e) {
+        // ignore
+      }
+      // expose a header to indicate we redacted (optional)
+      res.setHeader('X-Url-Redacted', '1');
+    }
+
+    // If client provided Authorization header + X-Service, inject into req.params so existing handlers work.
+    const auth = req.get('authorization') || req.get('Authorization');
+    const svc = (req.get('x-service') || req.get('x-addon-service') || '').toString().toLowerCase();
+    if (auth && auth.toLowerCase().startsWith('bearer ')) {
+      const token = auth.slice(7).trim();
+      if (token) {
+        req.params = Object.assign({}, req.params || {}, { token });
+        if (svc) req.params.service = svc;
+      }
+    }
+  } catch (e) {
+    // don't break requests on middleware error
+    console.warn('[auth-mw] failed', e && (e.message || e));
+  }
   next();
 });
 
@@ -88,6 +127,16 @@ const manifest = {
   idPrefixes: ["tt"]
 };
 
+// Helper: produce a short hash for tokens so we don't store raw tokens in cache keys/logs
+function tokenHash(token) {
+  try {
+    if (!token) return 'local';
+    return crypto.createHash('sha256').update(String(token)).digest('hex').slice(0, 16);
+  } catch (e) {
+    return 'err';
+  }
+}
+
 // Public manifest endpoint (used by the admin UI to show addon version)
 app.get('/manifest.json', (req, res) => {
   res.json(manifest);
@@ -162,9 +211,10 @@ app.get(["/:service(realdebrid|alldebrid|torbox)=:token/catalog/movie/asianclub_
   const { token, service } = req.params;
   const cache = require('./cache');
   const isLocal = !service;
-  const catalogNs = isLocal ? `catalog:local:movies` : `catalog:service:${service}:token:${token}`;
+  const tokenId = isLocal ? 'local' : tokenHash(token);
+  const catalogNs = isLocal ? `catalog:local:movies` : `catalog:service:${service}:token:${tokenId}`;
   const catalogVersion = await safeGetVersion(catalogNs);
-  const cacheKey = `catalog:v:${catalogVersion}:movies:${isLocal ? 'local' : `service:${service}:token:${token}`}:all`;
+  const cacheKey = `catalog:v:${catalogVersion}:movies:${isLocal ? 'local' : `service:${service}:token:${tokenId}`}:all`;
 
   const cached = await cache.get(cacheKey);
   if (cached) return res.json(cached);
@@ -182,7 +232,8 @@ app.get(["/:service(realdebrid|alldebrid|torbox)=:token/catalog/series/asianclub
   const { token, service } = req.params;
   const cache = require('./cache');
   const isLocal = !service;
-  const cacheKey = `catalog:series:${isLocal ? 'local' : `service:${service}:token:${token}`}:all`;
+  const tokenId = isLocal ? 'local' : tokenHash(token);
+  const cacheKey = `catalog:series:${isLocal ? 'local' : `service:${service}:token:${tokenId}`}:all`;
   const cached = await cache.get(cacheKey);
   if (cached) return res.json(cached);
 
@@ -224,7 +275,8 @@ app.get(["/:service(realdebrid|alldebrid|torbox)=:token/meta/movie/:id.json", "/
   const isLocal = !service;
   const movieNs = `movie:${id}`;
   const metaVersion = await safeGetVersion(movieNs);
-  const cacheKey = `meta:v:${metaVersion}:movie:${isLocal ? 'id' : `service:${service}:token:${token}:id`}:${id}`;
+  const tokenId = isLocal ? 'local' : tokenHash(token);
+  const cacheKey = `meta:v:${metaVersion}:movie:${isLocal ? 'id' : `service:${service}:token:${tokenId}:id`}:${id}`;
 
   const cached = await cache.get(cacheKey);
   if (cached) return res.json(cached);
@@ -343,7 +395,8 @@ app.get("/:service(realdebrid|alldebrid|torbox)=:token/stream/:type/:id.json", a
     const cache = require('./cache');
     const movieNs = `movie:${id}`;
     const streamVersion = await safeGetVersion(movieNs);
-    const streamCacheKey = `stream:v:${streamVersion}:service:${service}:token:${token}:type:${type}:id:${id}`;
+    const tokenId = tokenHash(token);
+    const streamCacheKey = `stream:v:${streamVersion}:service:${service}:token:${tokenId}:type:${type}:id:${id}`;
 
     // Use getOrSet so concurrent requests coalesce into a single upstream fetch
     const computed = await cache.getOrSet(streamCacheKey, async () => {
