@@ -22,6 +22,42 @@ if (fs.existsSync(publicPath)) {
   console.warn('[server] public folder not found at', publicPath);
 }
 
+// Lightweight in-memory stats for logo requests (useful to debug high request rate)
+const logoStats = new Map();
+
+// Intercept requests to /logo.png to add cache headers and record stats
+app.get('/logo.png', (req, res, next) => {
+  try {
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const ua = (req.get('User-Agent') || '').slice(0,120);
+    const ref = (req.get('Referer') || '').slice(0,200);
+    const key = `${ip} | ${ua} | ${ref}`;
+    const now = Date.now();
+
+    const entry = logoStats.get(key) || { count: 0, firstSeen: now, lastSeen: now };
+    entry.count = (entry.count || 0) + 1;
+    entry.lastSeen = now;
+    logoStats.set(key, entry);
+
+    // allow long caching on clients / CDN to reduce upstream traffic
+    res.set('Cache-Control', 'public, max-age=604800, immutable'); // 7 days, immutable
+
+    // send the static file from disk
+    return res.sendFile(path.join(publicPath, 'logo.png'), (err) => {
+      if (err) return next(err);
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// Simple admin endpoint to inspect logo request statistics
+app.get('/admin/logo-stats', (req, res) => {
+  const list = Array.from(logoStats.entries()).map(([key, val]) => ({ key, count: val.count, firstSeen: val.firstSeen, lastSeen: val.lastSeen }));
+  list.sort((a, b) => b.count - a.count);
+  res.json({ totalKeys: list.length, top: list.slice(0, 50) });
+});
+
 // FUNCIÓN QUE LEE LOS JSONs
 function loadJSON(filename) {
   const filePath = path.resolve(process.cwd(), "public", filename);
