@@ -15,51 +15,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Mask token-in-URL (redact it) and map Authorization header + X-Service into params for compatibility
-app.use((req, res, next) => {
-  try {
-    const orig = req.originalUrl || req.url || '';
-    // pattern captures service and token value
-    const tokenInUrlRe = /\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/ig;
-    if (tokenInUrlRe.test(orig)) {
-      // extract token and service from URL for internal use (do NOT log the raw token)
-      // pattern global/ig used above; run a fresh exec to get first match
-      const m = /\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/i.exec(orig);
-      if (m) {
-        const svc = m[1].toLowerCase();
-        const rawToken = m[2];
-        // inject into params so handlers (including stream) have the real token available
-        req.params = Object.assign({}, req.params || {}, { token: rawToken, service: svc });
-        // replace token in the visible URL with a redacted marker (hash only)
-        const redacted = orig.replace(/\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/ig, (mm, s, t) => `/${s}=[REDACTED:${tokenHash(t)}]`);
-        try {
-          req.url = redacted;
-          req.originalUrl = redacted;
-        } catch (e) {
-          // ignore
-        }
-        // indicate we redacted (helps debugging downstream)
-        res.setHeader('X-Url-Redacted', '1');
-      }
-    }
-
-    // If client provided Authorization header + X-Service, inject into req.params so existing handlers work.
-    const auth = req.get('authorization') || req.get('Authorization');
-    const svc = (req.get('x-service') || req.get('x-addon-service') || '').toString().toLowerCase();
-    if (auth && auth.toLowerCase().startsWith('bearer ')) {
-      const token = auth.slice(7).trim();
-      if (token) {
-        req.params = Object.assign({}, req.params || {}, { token });
-        if (svc) req.params.service = svc;
-      }
-    }
-  } catch (e) {
-    // don't break requests on middleware error
-    console.warn('[auth-mw] failed', e && (e.message || e));
-  }
-  next();
-});
-
 // Serve static files from /public (logo, assets)
 const publicPath = path.resolve(process.cwd(), 'public');
 // Lightweight in-memory stats for logo requests (useful to debug high request rate)
