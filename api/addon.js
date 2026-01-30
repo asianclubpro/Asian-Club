@@ -14,6 +14,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve static files from /public (logo, assets)
+const publicPath = path.resolve(process.cwd(), 'public');
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+} else {
+  console.warn('[server] public folder not found at', publicPath);
+}
+
 // FUNCIÓN QUE LEE LOS JSONs
 function loadJSON(filename) {
   const filePath = path.resolve(process.cwd(), "public", filename);
