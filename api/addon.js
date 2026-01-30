@@ -22,18 +22,25 @@ app.use((req, res, next) => {
     // pattern captures service and token value
     const tokenInUrlRe = /\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/ig;
     if (tokenInUrlRe.test(orig)) {
-      // replace token with a redacted marker (keep service name)
-      const redacted = orig.replace(tokenInUrlRe, (m, svc, t) => `/${svc}=[REDACTED:${tokenHash(t)}]`);
-      // update req.url / req.originalUrl so internal loggers see redacted URL
-      try {
-        req._rawOriginalUrl = orig;
-        req.url = redacted;
-        req.originalUrl = redacted;
-      } catch (e) {
-        // ignore
+      // extract token and service from URL for internal use (do NOT log the raw token)
+      // pattern global/ig used above; run a fresh exec to get first match
+      const m = /\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/i.exec(orig);
+      if (m) {
+        const svc = m[1].toLowerCase();
+        const rawToken = m[2];
+        // inject into params so handlers (including stream) have the real token available
+        req.params = Object.assign({}, req.params || {}, { token: rawToken, service: svc });
+        // replace token in the visible URL with a redacted marker (hash only)
+        const redacted = orig.replace(/\/(realdebrid|alldebrid|torbox)=([^\/\s]+)/ig, (mm, s, t) => `/${s}=[REDACTED:${tokenHash(t)}]`);
+        try {
+          req.url = redacted;
+          req.originalUrl = redacted;
+        } catch (e) {
+          // ignore
+        }
+        // indicate we redacted (helps debugging downstream)
+        res.setHeader('X-Url-Redacted', '1');
       }
-      // expose a header to indicate we redacted (optional)
-      res.setHeader('X-Url-Redacted', '1');
     }
 
     // If client provided Authorization header + X-Service, inject into req.params so existing handlers work.
